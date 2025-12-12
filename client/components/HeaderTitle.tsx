@@ -1,39 +1,47 @@
 import React from "react";
-import { View, StyleSheet, Image } from "react-native";
-
+import { StyleSheet, View, Image } from "react-native";
+import { Feather } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
-import { Spacing } from "@/constants/theme";
+import { useTheme } from "@/hooks/useTheme";
+import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 
 interface HeaderTitleProps {
-  title: string;
+  title?: string;
 }
 
 export function HeaderTitle({ title }: HeaderTitleProps) {
+  const { isDark } = useTheme();
+  const colors = isDark ? Colors.dark : Colors.light;
+
   return (
     <View style={styles.container}>
-      <Image
-        source={require("../../assets/images/icon.png")}
-        style={styles.icon}
-        resizeMode="contain"
-      />
-      <ThemedText style={styles.title}>{title}</ThemedText>
+      <View style={[styles.iconWrapper, { backgroundColor: colors.primary + '20' }]}>
+        <Feather name="home" size={18} color={colors.primary} />
+      </View>
+      <ThemedText style={styles.title}>{title || "AptManager"}</ThemedText>
     </View>
   );
+}
+
+export default function HeaderTitleDefault() {
+  return <HeaderTitle />;
 }
 
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
+    gap: Spacing.sm,
   },
-  icon: {
-    width: 28,
-    height: 28,
-    marginRight: Spacing.sm,
+  iconWrapper: {
+    width: 32,
+    height: 32,
+    borderRadius: BorderRadius.sm,
+    alignItems: "center",
+    justifyContent: "center",
   },
   title: {
-    fontSize: 17,
-    fontWeight: "600",
+    fontSize: 18,
+    fontWeight: "700",
   },
 });
