@@ -1,0 +1,295 @@
+Apartment Management System – Detailed Functional Document (Updated)
+1. Introduction
+
+The Apartment Management System organizes all operations of residential complexes, including maintenance, payments, communication, security, facility booking, and incident tracking—ensuring transparency and efficiency.
+
+2. User Roles
+2.1 Resident
+
+View and pay bills
+
+Raise tickets
+
+Track visitors & deliveries
+
+Book facilities
+
+View notices & events
+
+Participate in polls
+
+2.2 Society Management / Committee
+
+Manage billing & payments
+
+Approve requests
+
+Monitor maintenance
+
+Manage staff & vendors
+
+View reports
+
+2.3 Security Staff
+
+Handle visitor entries
+
+Track vehicles
+
+Log deliveries
+
+Respond to emergency alerts
+
+2.4 Maintenance Team
+
+Receive tickets
+
+Update service logs
+
+Manage equipment & repairs
+
+3. System Modules
+3.1 Dashboard
+
+Role-based dashboard
+
+Alerts & reminders
+
+Quick actions
+
+Recent updates
+
+Payment reminders
+
+3.2 Resident & Unit Management
+
+Unit / flat information
+
+Owner/tenant management
+
+Move-in / move-out
+
+Family member & pet registry
+
+Vehicle registration
+
+3.3 Maintenance Management
+
+Generate monthly/annual maintenance charges
+
+Custom maintenance categories
+
+Track pending/overdue payments
+
+Scheduled maintenance plans
+
+Preventive maintenance logs
+
+3.4 Ticket / Complaint Management
+
+Residents create service tickets
+
+Status tracking (Open → In-progress → Resolved)
+
+SLA monitoring
+
+Assign staff or external vendor
+
+Notifications for updates
+
+Feedback after closure
+
+3.5 Payment & Billing Management
+Bills
+
+Maintenance bills
+
+Utility bills (water, gas, common charges)
+
+One-time charges
+
+Late fee/penalty conditions
+
+Bill history
+
+Payments
+
+Online/offline payments
+
+Auto-dues calculation
+
+Receipt generation
+
+Payment reminders
+
+3.6 Security & Gate Management
+
+Visitor entry/exit system
+
+Pre-approved visitor check-in
+
+Delivery/courier logging
+
+Staff & housekeeping attendance
+
+Vehicle entry logs
+
+Emergency alert handling
+
+3.7 Facility Booking Management
+
+Facility list (gym, party hall, clubhouse, etc.)
+
+Slot-based booking
+
+Booking rules & guidelines
+
+Paid or free booking options
+
+Approval workflow
+
+3.8 Event & Notice Board
+
+Announcements & notices
+
+Upcoming events
+
+Circulars
+
+Document attachments (PDFs, images)
+
+3.9 Communication Module
+
+App notifications
+
+SMS/email alerts
+
+Internal messaging
+
+Emergency broadcast messages
+
+Polls & surveys
+
+3.10 Vendor & Staff Management
+
+Vendor list (plumber, electrician, etc.)
+
+AMC contract records
+
+Staff attendance & duty records
+
+Performance notes
+
+Gate pass for external workers
+
+Contract renewal reminders
+
+3.11 Inventory & Asset Management
+
+Track assets (generators, pumps, gym items)
+
+Maintenance logs for assets
+
+Consumables inventory tracking
+
+Purchase history
+
+3.12 Parking Management
+
+Slot allocation
+
+Visitor parking records
+
+Resident vehicle database
+
+Parking violation reporting
+
+3.13 Document Repository
+
+Society rules & bylaws
+
+Meeting minutes
+
+Audit/budget reports
+
+Agreements & contracts
+
+Shared documents
+
+3.14 Reports & Analytics
+
+Reports for:
+
+Maintenance collection
+
+Pending dues
+
+Ticket resolution stats
+
+Visitor & delivery logs
+
+Staff attendance
+
+Expense-income statements
+
+Asset/inventory tracking
+
+Facility usage stats
+
+Dashboard analytics:
+
+Charts & summaries
+
+Payment trends
+
+Ticket overview
+
+Visitor patterns
+
+3.15 Alerts & Notifications
+
+Bill due reminders
+
+Ticket status updates
+
+Visitor arrival alerts
+
+Parcel delivery notifications
+
+Event notifications
+
+Emergency alerts
+
+3.16 Polls & Voting System
+
+Create polls
+
+Residents-only voting
+
+Anonymous or open mode
+
+Result analytics
+
+3.17 Emergency & Safety Features
+
+Panic/SOS button
+
+Emergency contacts (police, ambulance, fire)
+
+Health & safety guidelines
+
+4. Additional Optional Modules
+
+Classifieds (buy/sell items)
+
+Marketplace for services
+
+Rental agreement reminders
+
+Tenant management
+
+Intercom via app (non-IoT)
+
+5. Conclusion
+
+This updated document includes all necessary functional modules for an Apartment Management System without any IoT-related features. It is suitable for requirement gathering, planning, and system design.
