@@ -5,13 +5,15 @@ import { Feather } from '@expo/vector-icons';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useTheme } from '@/hooks/useTheme';
+import { useData } from '@/context/DataContext';
 import { Spacing, BorderRadius, Colors } from '@/constants/theme';
-import { EMERGENCY_CONTACTS, EmergencyContact } from '@/data/mockData';
+import { EmergencyContact } from '@/data/mockData';
 
 export default function EmergencyScreen() {
   const insets = useSafeAreaInsets();
   const { theme, isDark } = useTheme();
   const colors = isDark ? Colors.dark : Colors.light;
+  const { emergencyContacts } = useData();
 
   const handleCall = (contact: EmergencyContact) => {
     Alert.alert(
@@ -19,8 +21,8 @@ export default function EmergencyScreen() {
       `This will dial ${contact.phone}`,
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Call', 
+        {
+          text: 'Call',
           onPress: () => Linking.openURL(`tel:${contact.phone}`)
         }
       ]

@@ -1,8 +1,23 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import {
-  Bill, Ticket, Visitor, FacilityBooking, Notice, Poll,
-  BILLS, TICKETS, VISITORS, FACILITY_BOOKINGS, NOTICES, POLLS,
+  Bill, Ticket, Visitor, FacilityBooking, Notice, Poll, User, Staff,
+  Unit, Vendor, EmergencyContact, Facility, Document,
 } from '@/data/mockData';
+import {
+  ticketService,
+  billService,
+  visitorService,
+  facilityService,
+  noticeService,
+  pollService,
+  userService,
+  staffService,
+  unitService,
+  vendorService,
+  emergencyService,
+  documentService,
+} from '@/services/api';
+import { useAuth } from './AuthContext';
 
 interface DataContextType {
   bills: Bill[];
@@ -11,90 +26,243 @@ interface DataContextType {
   facilityBookings: FacilityBooking[];
   notices: Notice[];
   polls: Poll[];
-  addTicket: (ticket: Omit<Ticket, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  updateTicket: (id: string, updates: Partial<Ticket>) => void;
-  addVisitor: (visitor: Omit<Visitor, 'id'>) => void;
-  checkOutVisitor: (id: string) => void;
-  addFacilityBooking: (booking: Omit<FacilityBooking, 'id'>) => void;
-  updateFacilityBooking: (id: string, updates: Partial<FacilityBooking>) => void;
-  payBill: (id: string) => void;
-  votePoll: (pollId: string, optionId: string, userId: string) => void;
+  users: User[];
+  staff: Staff[];
+  units: Unit[];
+  vendors: Vendor[];
+  emergencyContacts: EmergencyContact[];
+  facilities: Facility[];
+  documents: Document[];
+  refreshData: () => Promise<void>;
+  addTicket: (ticket: any) => Promise<void>;
+  updateTicket: (id: string, updates: Partial<Ticket>) => Promise<void>;
+  addVisitor: (visitor: any) => Promise<void>;
+  checkOutVisitor: (id: string) => Promise<void>;
+  addFacilityBooking: (booking: any) => Promise<void>;
+  updateFacilityBooking: (id: string, updates: Partial<FacilityBooking>) => Promise<void>;
+  payBill: (id: string) => Promise<void>;
+  votePoll: (pollId: string, optionIndex: number, userId: string) => Promise<void>;
+  addUser: (user: any) => Promise<void>;
+  updateUser: (id: string, updates: Partial<User>) => Promise<void>;
+  deleteUser: (id: string) => Promise<void>;
+  addStaff: (staff: any) => Promise<void>;
+  updateStaff: (id: string, updates: Partial<Staff>) => Promise<void>;
+  deleteStaff: (id: string) => Promise<void>;
+  // Add other methods as needed
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export function DataProvider({ children }: { children: ReactNode }) {
-  const [bills, setBills] = useState<Bill[]>(BILLS);
-  const [tickets, setTickets] = useState<Ticket[]>(TICKETS);
-  const [visitors, setVisitors] = useState<Visitor[]>(VISITORS);
-  const [facilityBookings, setFacilityBookings] = useState<FacilityBooking[]>(FACILITY_BOOKINGS);
-  const [notices] = useState<Notice[]>(NOTICES);
-  const [polls, setPolls] = useState<Poll[]>(POLLS);
+  const { isAuthenticated } = useAuth();
+  const [bills, setBills] = useState<Bill[]>([]);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [visitors, setVisitors] = useState<Visitor[]>([]);
+  const [facilityBookings, setFacilityBookings] = useState<FacilityBooking[]>([]);
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const [polls, setPolls] = useState<Poll[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [staff, setStaff] = useState<Staff[]>([]);
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [emergencyContacts, setEmergencyContacts] = useState<EmergencyContact[]>([]);
+  const [facilities, setFacilities] = useState<Facility[]>([]);
+  const [documents, setDocuments] = useState<Document[]>([]);
 
-  const addTicket = (ticket: Omit<Ticket, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const now = new Date().toISOString().split('T')[0];
-    const newTicket: Ticket = {
-      ...ticket,
-      id: `t${Date.now()}`,
-      createdAt: now,
-      updatedAt: now,
-    };
-    setTickets(prev => [newTicket, ...prev]);
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadData();
+    }
+  }, [isAuthenticated]);
+
+  const loadData = async () => {
+    try {
+      const [
+        fetchedBills,
+        fetchedTickets,
+        fetchedVisitors,
+        fetchedBookings,
+        fetchedNotices,
+        fetchedPolls,
+        fetchedUsers,
+        fetchedStaff,
+        fetchedUnits,
+        fetchedVendors,
+        fetchedEmergency,
+        fetchedFacilities,
+        fetchedDocuments
+      ] = await Promise.all([
+        billService.getAll(),
+        ticketService.getAll(),
+        visitorService.getAll(),
+        facilityService.getBookings(),
+        noticeService.getAll(),
+        pollService.getAll(),
+        userService.getAll(),
+        staffService.getAll(),
+        unitService.getAll(),
+        vendorService.getAll(),
+        emergencyService.getAll(),
+        facilityService.getAll(),
+        documentService.getAll()
+      ]);
+
+      setBills(fetchedBills);
+      setTickets(fetchedTickets);
+      setVisitors(fetchedVisitors);
+      setFacilityBookings(fetchedBookings);
+      setNotices(fetchedNotices);
+      setPolls(fetchedPolls);
+      setUsers(fetchedUsers);
+      setStaff(fetchedStaff);
+      setUnits(fetchedUnits);
+      setVendors(fetchedVendors);
+      setEmergencyContacts(fetchedEmergency);
+      setFacilities(fetchedFacilities);
+      setDocuments(fetchedDocuments);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    }
   };
 
-  const updateTicket = (id: string, updates: Partial<Ticket>) => {
-    setTickets(prev => prev.map(t =>
-      t.id === id ? { ...t, ...updates, updatedAt: new Date().toISOString().split('T')[0] } : t
-    ));
+  const addTicket = async (ticket: any) => {
+    try {
+      const newTicket = await ticketService.create(ticket);
+      setTickets(prev => [newTicket, ...prev]);
+    } catch (error) {
+      console.error('Error adding ticket:', error);
+      throw error;
+    }
   };
 
-  const addVisitor = (visitor: Omit<Visitor, 'id'>) => {
-    const newVisitor: Visitor = {
-      ...visitor,
-      id: `vis${Date.now()}`,
-    };
-    setVisitors(prev => [newVisitor, ...prev]);
+  const updateTicket = async (id: string, updates: Partial<Ticket>) => {
+    try {
+      const updatedTicket = await ticketService.update(id, updates);
+      setTickets(prev => prev.map(t => t.id === id ? updatedTicket : t));
+    } catch (error) {
+      console.error('Error updating ticket:', error);
+      throw error;
+    }
   };
 
-  const checkOutVisitor = (id: string) => {
-    setVisitors(prev => prev.map(v =>
-      v.id === id ? { ...v, checkOutTime: new Date().toISOString() } : v
-    ));
+  const addVisitor = async (visitor: any) => {
+    try {
+      const newVisitor = await visitorService.checkIn(visitor);
+      setVisitors(prev => [newVisitor, ...prev]);
+    } catch (error) {
+      console.error('Error adding visitor:', error);
+      throw error;
+    }
   };
 
-  const addFacilityBooking = (booking: Omit<FacilityBooking, 'id'>) => {
-    const newBooking: FacilityBooking = {
-      ...booking,
-      id: `fb${Date.now()}`,
-    };
-    setFacilityBookings(prev => [newBooking, ...prev]);
+  const checkOutVisitor = async (id: string) => {
+    try {
+      const updatedVisitor = await visitorService.checkOut(id);
+      setVisitors(prev => prev.map(v => v.id === id ? updatedVisitor : v));
+    } catch (error) {
+      console.error('Error checking out visitor:', error);
+      throw error;
+    }
   };
 
-  const updateFacilityBooking = (id: string, updates: Partial<FacilityBooking>) => {
-    setFacilityBookings(prev => prev.map(b =>
-      b.id === id ? { ...b, ...updates } : b
-    ));
+  const addFacilityBooking = async (booking: any) => {
+    try {
+      const newBooking = await facilityService.createBooking(booking);
+      setFacilityBookings(prev => [newBooking, ...prev]);
+    } catch (error) {
+      console.error('Error adding facility booking:', error);
+      throw error;
+    }
   };
 
-  const payBill = (id: string) => {
-    setBills(prev => prev.map(b =>
-      b.id === id ? { ...b, status: 'paid', paidDate: new Date().toISOString().split('T')[0] } : b
-    ));
+  const updateFacilityBooking = async (id: string, updates: Partial<FacilityBooking>) => {
+    try {
+      const updatedBooking = await facilityService.updateBooking(id, updates);
+      setFacilityBookings(prev => prev.map(b => b.id === id ? updatedBooking : b));
+    } catch (error) {
+      console.error('Error updating facility booking:', error);
+      throw error;
+    }
   };
 
-  const votePoll = (pollId: string, optionId: string, userId: string) => {
-    setPolls(prev => prev.map(p => {
-      if (p.id === pollId && !p.votedBy.includes(userId)) {
-        return {
-          ...p,
-          votedBy: [...p.votedBy, userId],
-          options: p.options.map(o =>
-            o.id === optionId ? { ...o, votes: o.votes + 1 } : o
-          ),
-        };
-      }
-      return p;
-    }));
+  const payBill = async (id: string) => {
+    try {
+      const updatedBill = await billService.pay(id);
+      setBills(prev => prev.map(b => b.id === id ? updatedBill : b));
+    } catch (error) {
+      console.error('Error paying bill:', error);
+      throw error;
+    }
+  };
+
+  const votePoll = async (pollId: string, optionIndex: number, userId: string) => {
+    try {
+      const updatedPoll = await pollService.vote(pollId, optionIndex);
+      setPolls(prev => prev.map(p => p.id === pollId ? updatedPoll : p));
+    } catch (error) {
+      console.error('Error voting poll:', error);
+      throw error;
+    }
+  };
+
+  const addUser = async (user: any) => {
+    try {
+      const newUser = await userService.create(user);
+      setUsers(prev => [...prev, newUser]);
+    } catch (error) {
+      console.error('Error adding user:', error);
+      throw error;
+    }
+  };
+
+  const updateUser = async (id: string, updates: Partial<User>) => {
+    try {
+      const updatedUser = await userService.update(id, updates);
+      setUsers(prev => prev.map(u => u.id === id ? updatedUser : u));
+    } catch (error) {
+      console.error('Error updating user:', error);
+      throw error;
+    }
+  };
+
+  const deleteUser = async (id: string) => {
+    try {
+      await userService.delete(id);
+      setUsers(prev => prev.filter(u => u.id !== id));
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      throw error;
+    }
+  };
+
+  const addStaff = async (staffMember: any) => {
+    try {
+      const newStaff = await staffService.create(staffMember);
+      setStaff(prev => [...prev, newStaff]);
+    } catch (error) {
+      console.error('Error adding staff:', error);
+      throw error;
+    }
+  };
+
+  const updateStaff = async (id: string, updates: Partial<Staff>) => {
+    try {
+      const updatedStaff = await staffService.update(id, updates);
+      setStaff(prev => prev.map(s => s.id === id ? updatedStaff : s));
+    } catch (error) {
+      console.error('Error updating staff:', error);
+      throw error;
+    }
+  };
+
+  const deleteStaff = async (id: string) => {
+    try {
+      await staffService.delete(id);
+      setStaff(prev => prev.filter(s => s.id !== id));
+    } catch (error) {
+      console.error('Error deleting staff:', error);
+      throw error;
+    }
   };
 
   return (
@@ -105,6 +273,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
       facilityBookings,
       notices,
       polls,
+      users,
+      staff,
+      units,
+      vendors,
+      emergencyContacts,
+      refreshData: loadData,
       addTicket,
       updateTicket,
       addVisitor,
@@ -113,6 +287,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
       updateFacilityBooking,
       payBill,
       votePoll,
+      addUser,
+      updateUser,
+      deleteUser,
+      addStaff,
+      updateStaff,
+      deleteStaff,
     }}>
       {children}
     </DataContext.Provider>

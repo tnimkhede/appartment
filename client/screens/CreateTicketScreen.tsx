@@ -1,3 +1,4 @@
+```
 import React, { useState } from 'react';
 import { StyleSheet, View, TextInput, Pressable, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -11,14 +12,14 @@ import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/context/AuthContext';
 import { useData } from '@/context/DataContext';
 import { Spacing, BorderRadius, Colors } from '@/constants/theme';
-import { UNITS, TICKET_CATEGORIES, PRIORITY_LEVELS } from '@/data/mockData';
+import { TICKET_CATEGORIES, PRIORITY_LEVELS } from '@/data/mockData';
 
 export default function CreateTicketScreen() {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { theme, isDark } = useTheme();
   const { user } = useAuth();
-  const { addTicket } = useData();
+  const { addTicket, units } = useData();
   const colors = isDark ? Colors.dark : Colors.light;
 
   const [category, setCategory] = useState('');

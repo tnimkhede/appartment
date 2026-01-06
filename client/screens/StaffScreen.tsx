@@ -1,17 +1,81 @@
-import React from 'react';
-import { StyleSheet, View, FlatList, Pressable, Linking } from 'react-native';
+
+import React, { useState } from 'react';
+import { StyleSheet, View, FlatList, Pressable, Linking, Modal, TextInput, Alert, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { Button } from '@/components/Button';
 import { useTheme } from '@/hooks/useTheme';
+import { useAuth } from '@/context/AuthContext';
+import { useData } from '@/context/DataContext';
 import { Spacing, BorderRadius, Colors } from '@/constants/theme';
-import { STAFF, Staff } from '@/data/mockData';
+import { Staff } from '@/data/mockData';
 
 export default function StaffScreen() {
   const insets = useSafeAreaInsets();
   const { theme, isDark } = useTheme();
+  const { user: currentUser } = useAuth();
+  const { staff, addStaff, updateStaff, deleteStaff } = useData();
   const colors = isDark ? Colors.dark : Colors.light;
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editingStaff, setEditingStaff] = useState<Staff | null>(null);
+  const [name, setName] = useState('');
+  const [role, setRole] = useState('');
+  const [phone, setPhone] = useState('');
+  const [shift, setShift] = useState('');
+
+  const isAdmin = currentUser?.role === 'management';
+
+  const handleAdd = () => {
+    setEditingStaff(null);
+    setName('');
+    setRole('');
+    setPhone('');
+    setShift('');
+    setModalVisible(true);
+  };
+
+  const handleEdit = (staffMember: Staff) => {
+    setEditingStaff(staffMember);
+    setName(staffMember.name);
+    setRole(staffMember.role);
+    setPhone(staffMember.phone);
+    setShift(staffMember.shift);
+    setModalVisible(true);
+  };
+
+  const handleDelete = (staffId: string) => {
+    Alert.alert(
+      'Delete Staff',
+      'Are you sure you want to delete this staff member?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: () => deleteStaff(staffId) }
+      ]
+    );
+  };
+
+  const handleSave = () => {
+    if (!name || !role || !phone || !shift) {
+      Alert.alert('Error', 'Please fill all fields');
+      return;
+    }
+
+    if (editingStaff) {
+      updateStaff(editingStaff.id, { name, role, phone, shift });
+    } else {
+      addStaff({
+        name,
+        role,
+        phone,
+        shift,
+        attendance: [], // Initialize with empty attendance
+      });
+    }
+    setModalVisible(false);
+  };
 
   const getRoleIcon = (role: string): keyof typeof Feather.glyphMap => {
     switch (role.toLowerCase()) {
@@ -57,6 +121,16 @@ export default function StaffScreen() {
               </ThemedText>
             </View>
           ) : null}
+          {isAdmin && (
+            <View style={styles.adminActions}>
+              <Pressable onPress={() => handleEdit(item)} style={styles.iconButton}>
+                <Feather name="edit-2" size={18} color={colors.primary} />
+              </Pressable>
+              <Pressable onPress={() => handleDelete(item.id)} style={styles.iconButton}>
+                <Feather name="trash-2" size={18} color={colors.error} />
+              </Pressable>
+            </View>
+          )}
         </View>
 
         <View style={styles.detailsSection}>
@@ -76,7 +150,7 @@ export default function StaffScreen() {
               styles.actionButton,
               { backgroundColor: colors.success, opacity: pressed ? 0.8 : 1 }
             ]}
-            onPress={() => Linking.openURL(`tel:${item.phone}`)}
+            onPress={() => Linking.openURL(`tel:${item.phone} `)}
           >
             <Feather name="phone" size={14} color="#FFFFFF" />
             <ThemedText style={styles.actionButtonText}>Call</ThemedText>
@@ -86,9 +160,9 @@ export default function StaffScreen() {
     );
   };
 
-  const presentCount = STAFF.filter(s => getLatestAttendance(s)?.status === 'present').length;
-  const absentCount = STAFF.filter(s => getLatestAttendance(s)?.status === 'absent').length;
-  const leaveCount = STAFF.filter(s => getLatestAttendance(s)?.status === 'leave').length;
+  const presentCount = staff.filter(s => getLatestAttendance(s)?.status === 'present').length;
+  const absentCount = staff.filter(s => getLatestAttendance(s)?.status === 'absent').length;
+  const leaveCount = staff.filter(s => getLatestAttendance(s)?.status === 'leave').length;
 
   return (
     <ThemedView style={styles.container}>
@@ -116,8 +190,14 @@ export default function StaffScreen() {
         </View>
       </View>
 
+      {isAdmin && (
+        <View style={styles.addButtonContainer}>
+          <Button onPress={handleAdd} icon="plus">Add Staff</Button>
+        </View>
+      )}
+
       <FlatList
-        data={STAFF}
+        data={staff}
         keyExtractor={item => item.id}
         renderItem={renderStaff}
         contentContainerStyle={[
@@ -126,6 +206,77 @@ export default function StaffScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       />
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: colors.backgroundDefault }]}>
+            <View style={styles.modalHeader}>
+              <ThemedText style={styles.modalTitle}>
+                {editingStaff ? 'Edit Staff' : 'Add Staff'}
+              </ThemedText>
+              <Pressable onPress={() => setModalVisible(false)}>
+                <Feather name="x" size={24} color={colors.textSecondary} />
+              </Pressable>
+            </View>
+
+            <ScrollView style={styles.modalBody}>
+              <View style={styles.inputGroup}>
+                <ThemedText style={styles.label}>Name</ThemedText>
+                <TextInput
+                  style={[styles.input, { color: theme.text, borderColor: colors.border, backgroundColor: colors.backgroundSecondary }]}
+                  value={name}
+                  onChangeText={setName}
+                  placeholder="Enter name"
+                  placeholderTextColor={colors.textSecondary}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <ThemedText style={styles.label}>Role</ThemedText>
+                <TextInput
+                  style={[styles.input, { color: theme.text, borderColor: colors.border, backgroundColor: colors.backgroundSecondary }]}
+                  value={role}
+                  onChangeText={setRole}
+                  placeholder="e.g. Security Guard, Maintenance"
+                  placeholderTextColor={colors.textSecondary}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <ThemedText style={styles.label}>Phone</ThemedText>
+                <TextInput
+                  style={[styles.input, { color: theme.text, borderColor: colors.border, backgroundColor: colors.backgroundSecondary }]}
+                  value={phone}
+                  onChangeText={setPhone}
+                  placeholder="Enter phone number"
+                  placeholderTextColor={colors.textSecondary}
+                  keyboardType="phone-pad"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <ThemedText style={styles.label}>Shift</ThemedText>
+                <TextInput
+                  style={[styles.input, { color: theme.text, borderColor: colors.border, backgroundColor: colors.backgroundSecondary }]}
+                  value={shift}
+                  onChangeText={setShift}
+                  placeholder="e.g. Day (6AM-6PM)"
+                  placeholderTextColor={colors.textSecondary}
+                />
+              </View>
+
+              <Button onPress={handleSave} style={styles.saveButton}>
+                Save Staff
+              </Button>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </ThemedView>
   );
 }
@@ -159,6 +310,10 @@ const styles = StyleSheet.create({
   summaryLabel: {
     fontSize: 11,
     marginTop: 2,
+  },
+  addButtonContainer: {
+    paddingHorizontal: Spacing.lg,
+    marginBottom: Spacing.md,
   },
   listContent: {
     paddingHorizontal: Spacing.lg,
@@ -210,6 +365,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textTransform: 'capitalize',
   },
+  adminActions: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    marginLeft: Spacing.sm,
+  },
+  iconButton: {
+    padding: Spacing.xs,
+  },
   detailsSection: {
     gap: Spacing.sm,
     marginBottom: Spacing.md,
@@ -239,5 +402,46 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 13,
     fontWeight: '500',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    borderTopLeftRadius: BorderRadius.xl,
+    borderTopRightRadius: BorderRadius.xl,
+    padding: Spacing.xl,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.xl,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  modalBody: {
+    marginBottom: Spacing.xl,
+  },
+  inputGroup: {
+    marginBottom: Spacing.lg,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginBottom: Spacing.xs,
+  },
+  input: {
+    borderWidth: 1,
+    borderRadius: BorderRadius.sm,
+    padding: Spacing.md,
+    fontSize: 16,
+  },
+  saveButton: {
+    marginTop: Spacing.md,
   },
 });

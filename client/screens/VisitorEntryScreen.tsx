@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { StyleSheet, View, TextInput, Pressable, Alert, FlatList } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,7 +11,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/context/AuthContext';
 import { useData } from '@/context/DataContext';
 import { Spacing, BorderRadius, Colors } from '@/constants/theme';
-import { UNITS, Visitor } from '@/data/mockData';
+import { Visitor } from '@/data/mockData'; // Visitor type is still needed
 
 type EntryType = 'visitor' | 'delivery' | 'service';
 
@@ -18,7 +19,7 @@ export default function VisitorEntryScreen() {
   const insets = useSafeAreaInsets();
   const { theme, isDark } = useTheme();
   const { user } = useAuth();
-  const { visitors, addVisitor, checkOutVisitor } = useData();
+  const { visitors, addVisitor, checkOutVisitor, units } = useData(); // Added 'units' here
   const colors = isDark ? Colors.dark : Colors.light;
 
   const [entryType, setEntryType] = useState<EntryType>('visitor');
@@ -36,7 +37,7 @@ export default function VisitorEntryScreen() {
       return;
     }
 
-    const unit = UNITS.find(u => u.number.toLowerCase() === unitNumber.toLowerCase());
+    const unit = units.find(u => u.number.toLowerCase() === unitNumber.toLowerCase());
     if (!unit) {
       Alert.alert('Error', 'Unit not found. Please check the unit number.');
       return;
@@ -53,7 +54,7 @@ export default function VisitorEntryScreen() {
     });
 
     Alert.alert('Success', `${entryType === 'visitor' ? 'Visitor' : entryType === 'delivery' ? 'Delivery' : 'Service personnel'} checked in successfully!`);
-    
+
     setVisitorName('');
     setPhone('');
     setUnitNumber('');
@@ -66,10 +67,12 @@ export default function VisitorEntryScreen() {
       `Check out ${visitor.name}?`,
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Check Out', onPress: () => {
-          checkOutVisitor(visitor.id);
-          Alert.alert('Success', 'Visitor checked out successfully');
-        }}
+        {
+          text: 'Check Out', onPress: () => {
+            checkOutVisitor(visitor.id);
+            Alert.alert('Success', 'Visitor checked out successfully');
+          }
+        }
       ]
     );
   };
@@ -78,7 +81,7 @@ export default function VisitorEntryScreen() {
     <Pressable
       style={[
         styles.typeTab,
-        { 
+        {
           backgroundColor: entryType === type ? colors.primary : colors.backgroundDefault,
           borderColor: entryType === type ? colors.primary : colors.border,
         }
@@ -96,17 +99,17 @@ export default function VisitorEntryScreen() {
   );
 
   const renderActiveVisitor = ({ item }: { item: Visitor }) => {
-    const unit = UNITS.find(u => u.id === item.unitId);
+    const unit = units.find(u => u.id === item.unitId);
     const checkInTime = new Date(item.checkInTime);
     const timeString = checkInTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     return (
       <View style={[styles.visitorCard, { backgroundColor: colors.backgroundDefault }]}>
         <View style={[styles.visitorIcon, { backgroundColor: colors.success + '20' }]}>
-          <Feather 
-            name={item.type === 'visitor' ? 'user' : item.type === 'delivery' ? 'package' : 'tool'} 
-            size={18} 
-            color={colors.success} 
+          <Feather
+            name={item.type === 'visitor' ? 'user' : item.type === 'delivery' ? 'package' : 'tool'}
+            size={18}
+            color={colors.success}
           />
         </View>
         <View style={styles.visitorInfo}>

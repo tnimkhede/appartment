@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { StyleSheet, View, FlatList, Pressable, Alert, Modal, TextInput } from 'react-native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
@@ -10,14 +11,14 @@ import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/context/AuthContext';
 import { useData } from '@/context/DataContext';
 import { Spacing, BorderRadius, Colors } from '@/constants/theme';
-import { FACILITIES, UNITS, Facility } from '@/data/mockData';
+import { Facility } from '@/data/mockData'; // Keep Facility type import if not defined elsewhere
 
 export default function FacilitiesScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const insets = useSafeAreaInsets();
   const { theme, isDark } = useTheme();
   const { user } = useAuth();
-  const { facilityBookings, addFacilityBooking } = useData();
+  const { facilities, units, facilityBookings, addFacilityBooking } = useData(); // Added facilities and units from useData
   const colors = isDark ? Colors.dark : Colors.light;
 
   const [selectedFacility, setSelectedFacility] = useState<Facility | null>(null);
@@ -26,7 +27,7 @@ export default function FacilitiesScreen() {
   const [bookingTime, setBookingTime] = useState('');
   const [bookingPurpose, setBookingPurpose] = useState('');
 
-  const userUnit = UNITS.find(u => u.ownerId === user?.id);
+  const userUnit = units.find(u => u.ownerId === user?.id);
   const userBookings = facilityBookings.filter(b => b.bookedBy === user?.id);
 
   const getAvailabilityStatus = (facilityId: string) => {
@@ -165,7 +166,7 @@ export default function FacilitiesScreen() {
       ) : null}
 
       <FlatList
-        data={FACILITIES}
+        data={facilities}
         keyExtractor={item => item.id}
         renderItem={renderFacility}
         contentContainerStyle={[

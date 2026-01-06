@@ -10,14 +10,14 @@ import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/context/AuthContext';
 import { useData } from '@/context/DataContext';
 import { Spacing, BorderRadius, Colors } from '@/constants/theme';
-import { UNITS, PRIORITY_LEVELS, Ticket } from '@/data/mockData';
+import { PRIORITY_LEVELS, Ticket } from '@/data/mockData';
 
 type FilterType = 'all' | 'open' | 'in-progress' | 'resolved';
 
 export default function TicketsScreen() {
-  const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  const navigation = useNavigation();
   const tabBarHeight = useBottomTabBarHeight();
-  const { theme, isDark } = useTheme();
+  const { colors, isDark } = useTheme();
   const { user } = useAuth();
   const { tickets, updateTicket } = useData();
   const [filter, setFilter] = useState<FilterType>('all');
@@ -27,15 +27,15 @@ export default function TicketsScreen() {
 
   const filteredTickets = useMemo(() => {
     let result = tickets;
-    
+
     if (user?.role === 'resident') {
       result = result.filter(t => t.unitId === userUnit?.id);
     }
-    
+
     if (filter !== 'all') {
       result = result.filter(t => t.status === filter);
     }
-    
+
     return result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [tickets, filter, user, userUnit]);
 
@@ -72,7 +72,7 @@ export default function TicketsScreen() {
 
   const renderTicket = ({ item }: { item: Ticket }) => {
     const unit = UNITS.find(u => u.id === item.unitId);
-    
+
     return (
       <Pressable
         style={({ pressed }) => [
@@ -83,10 +83,10 @@ export default function TicketsScreen() {
       >
         <View style={styles.ticketHeader}>
           <View style={styles.ticketCategory}>
-            <Feather 
-              name={item.category === 'plumbing' ? 'droplet' : item.category === 'electrical' ? 'zap' : item.category === 'elevator' ? 'arrow-up-circle' : 'tool'} 
-              size={16} 
-              color={colors.primary} 
+            <Feather
+              name={item.category === 'plumbing' ? 'droplet' : item.category === 'electrical' ? 'zap' : item.category === 'elevator' ? 'arrow-up-circle' : 'tool'}
+              size={16}
+              color={colors.primary}
             />
             <ThemedText style={styles.categoryText}>{item.category}</ThemedText>
           </View>

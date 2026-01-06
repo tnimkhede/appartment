@@ -5,12 +5,14 @@ import { Feather } from '@expo/vector-icons';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useTheme } from '@/hooks/useTheme';
+import { useData } from '@/context/DataContext';
 import { Spacing, BorderRadius, Colors } from '@/constants/theme';
-import { VENDORS, Vendor } from '@/data/mockData';
+import { Vendor } from '@/data/mockData';
 
 export default function VendorsScreen() {
   const insets = useSafeAreaInsets();
   const { theme, isDark } = useTheme();
+  const { vendors } = useData();
   const colors = isDark ? Colors.dark : Colors.light;
 
   const getCategoryIcon = (category: string): keyof typeof Feather.glyphMap => {

@@ -1,3 +1,4 @@
+```javascript
 import React from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,7 +9,6 @@ import { Card } from '@/components/Card';
 import { useTheme } from '@/hooks/useTheme';
 import { useData } from '@/context/DataContext';
 import { Spacing, BorderRadius, Colors } from '@/constants/theme';
-import { UNITS, VISITORS, STAFF } from '@/data/mockData';
 
 export default function ReportsScreen() {
   const insets = useSafeAreaInsets();
@@ -53,8 +53,8 @@ export default function ReportsScreen() {
       >
         <ThemedText style={styles.sectionTitle}>Financial Overview</ThemedText>
         <View style={styles.statsGrid}>
-          {renderStatCard('dollar-sign', 'Total Collection', `$${totalCollection.toLocaleString()}`, colors.success)}
-          {renderStatCard('alert-circle', 'Pending Dues', `$${pendingDues.toLocaleString()}`, colors.error)}
+          {renderStatCard('dollar-sign', 'Total Collection', `$${ totalCollection.toLocaleString() } `, colors.success)}
+          {renderStatCard('alert-circle', 'Pending Dues', `$${ pendingDues.toLocaleString() } `, colors.error)}
         </View>
 
         <ThemedText style={styles.sectionTitle}>Maintenance Tickets</ThemedText>
@@ -71,9 +71,9 @@ export default function ReportsScreen() {
 
         <ThemedText style={styles.sectionTitle}>Staff & Operations</ThemedText>
         <View style={styles.statsGrid}>
-          {renderStatCard('user-check', 'Staff Present', `${staffPresent}/${STAFF.length}`, colors.success)}
-          {renderStatCard('home', 'Total Units', UNITS.length, colors.primary)}
-        </View>
+          {renderStatCard('user-check', 'Staff Present', `${ staffPresent }/${STAFF.length}`, colors.success)}
+{ renderStatCard('home', 'Total Units', UNITS.length, colors.primary) }
+        </View >
 
         <View style={[styles.chartPlaceholder, { backgroundColor: colors.backgroundDefault, borderColor: colors.border }]}>
           <Feather name="bar-chart-2" size={48} color={colors.textSecondary} />
@@ -98,8 +98,8 @@ export default function ReportsScreen() {
             </View>
           </View>
         </View>
-      </ScrollView>
-    </ThemedView>
+      </ScrollView >
+    </ThemedView >
   );
 }
 

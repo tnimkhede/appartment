@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { User, UserRole, USERS } from '@/data/mockData';
+import { User, UserRole } from '@/data/mockData';
+import { authService } from '@/services/api';
 
 interface AuthContextType {
   user: User | null;
@@ -14,6 +15,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AUTH_STORAGE_KEY = '@apt_manager_auth';
+const TOKEN_STORAGE_KEY = 'token';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -25,12 +27,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loadStoredAuth = async () => {
     try {
-      const stored = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
-      if (stored) {
-        const userData = JSON.parse(stored);
-        const validUser = USERS.find(u => u.id === userData.id);
-        if (validUser) {
-          setUser(validUser);
+      const token = await AsyncStorage.getItem(TOKEN_STORAGE_KEY);
+      if (token) {
+        // Verify token and get user data
+        try {
+          const userData = await authService.getMe();
+          setUser(userData);
+        } catch (error) {
+          // Token invalid or expired
+          await AsyncStorage.removeItem(TOKEN_STORAGE_KEY);
+          await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
         }
       }
     } catch (error) {
@@ -41,19 +47,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
-    const foundUser = USERS.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
-    
-    if (foundUser) {
-      setUser(foundUser);
-      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(foundUser));
+    try {
+      const response = await authService.login(email, password);
+
+      const userData = {
+        id: response.id,
+        name: response.name,
+        email: response.email,
+        role: response.role,
+        unitNumber: response.unitNumber,
+        phone: response.phone,
+        // password field is not returned by API and not needed in state
+      } as User;
+
+      setUser(userData);
+      await AsyncStorage.setItem(TOKEN_STORAGE_KEY, response.token);
+      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
+
       return { success: true };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Invalid email or password'
+      };
     }
-    
-    return { success: false, error: 'Invalid email or password' };
   };
 
   const logout = async () => {
     setUser(null);
+    await AsyncStorage.removeItem(TOKEN_STORAGE_KEY);
     await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
   };
 

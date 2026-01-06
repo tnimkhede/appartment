@@ -12,7 +12,6 @@ import { useTheme } from '@/hooks/useTheme';
 import { useAuth, getRoleColor, getRoleLabel } from '@/context/AuthContext';
 import { useData } from '@/context/DataContext';
 import { Spacing, BorderRadius, Colors } from '@/constants/theme';
-import { UNITS, VISITORS } from '@/data/mockData';
 
 export default function DashboardScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
@@ -20,12 +19,12 @@ export default function DashboardScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const { theme, isDark } = useTheme();
   const { user } = useAuth();
-  const { bills, tickets, notices } = useData();
+  const { units, visitors, tickets, bills, notices, polls } = useData();
   const colors = isDark ? Colors.dark : Colors.light;
 
   if (!user) return null;
 
-  const userUnit = UNITS.find(u => u.ownerId === user.id);
+  const userUnit = units.find(u => u.ownerId === user.id);
   const userBills = bills.filter(b => b.unitId === userUnit?.id);
   const pendingBills = userBills.filter(b => b.status !== 'paid');
   const pendingAmount = pendingBills.reduce((sum, b) => sum + b.amount, 0);
@@ -115,7 +114,7 @@ export default function DashboardScreen() {
               </Card>
             </>
           ) : null}
-          
+
           {user.role === 'security' ? (
             <>
               <Card style={styles.statCard}>
@@ -211,6 +210,7 @@ export default function DashboardScreen() {
             {user.role === 'management' ? (
               <>
                 {renderQuickAction('users', 'Residents', () => navigation.navigate('ResidentsScreen'))}
+                {renderQuickAction('briefcase', 'Staff', () => navigation.navigate('StaffScreen'))}
                 {renderQuickAction('bar-chart-2', 'Reports', () => navigation.navigate('ReportsScreen'))}
                 {renderQuickAction('file-text', 'Notices', () => navigation.navigate('NoticesScreen'))}
                 {renderQuickAction('settings', 'Settings', () => navigation.navigate('MoreTab'))}

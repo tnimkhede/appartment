@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { StyleSheet, View, FlatList, Pressable, Alert } from 'react-native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
@@ -10,17 +11,17 @@ import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/context/AuthContext';
 import { useData } from '@/context/DataContext';
 import { Spacing, BorderRadius, Colors } from '@/constants/theme';
-import { UNITS, Bill } from '@/data/mockData';
+import { Bill } from '@/data/mockData'; // Keep Bill type, remove UNITS
 
 export default function PaymentsScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const { theme, isDark } = useTheme();
   const { user } = useAuth();
-  const { bills, payBill } = useData();
+  const { bills, payBill, units } = useData(); // Add 'units' to useData destructuring
   const [selectedTab, setSelectedTab] = useState<'pending' | 'history'>('pending');
   const colors = isDark ? Colors.dark : Colors.light;
 
-  const userUnit = UNITS.find(u => u.ownerId === user?.id);
+  const userUnit = units.find(u => u.ownerId === user?.id); // Use 'units' from useData
 
   const userBills = useMemo(() => {
     if (user?.role === 'resident') {
@@ -36,11 +37,11 @@ export default function PaymentsScreen() {
   const handlePay = (bill: Bill) => {
     Alert.alert(
       'Confirm Payment',
-      `Pay $${bill.amount} for ${bill.description}?`,
+      `Pay $${bill.amount} for ${bill.description} ? `,
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Pay Now', 
+        {
+          text: 'Pay Now',
           onPress: () => {
             payBill(bill.id);
             Alert.alert('Success', 'Payment successful!');
@@ -85,7 +86,7 @@ export default function PaymentsScreen() {
           </ThemedText>
         </View>
       </View>
-      
+
       <View style={styles.billDetails}>
         <View style={styles.billRow}>
           <ThemedText style={[styles.billLabel, { color: colors.textSecondary }]}>Amount</ThemedText>

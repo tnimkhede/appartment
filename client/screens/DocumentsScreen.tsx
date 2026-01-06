@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { StyleSheet, View, FlatList, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -6,17 +7,19 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useTheme } from '@/hooks/useTheme';
 import { Spacing, BorderRadius, Colors } from '@/constants/theme';
-import { DOCUMENTS, Document } from '@/data/mockData';
+import { useData } from '@/context/DataContext';
+import { Document } from '@/data/mockData';
 
 type CategoryFilter = 'all' | 'rules' | 'minutes' | 'budget' | 'contract' | 'other';
 
 export default function DocumentsScreen() {
   const insets = useSafeAreaInsets();
   const { theme, isDark } = useTheme();
+  const { documents } = useData();
   const [filter, setFilter] = useState<CategoryFilter>('all');
   const colors = isDark ? Colors.dark : Colors.light;
 
-  const filteredDocs = filter === 'all' ? DOCUMENTS : DOCUMENTS.filter(d => d.category === filter);
+  const filteredDocs = filter === 'all' ? documents : documents.filter(d => d.category === filter);
 
   const getCategoryColor = (category: string) => {
     switch (category) {
@@ -42,7 +45,7 @@ export default function DocumentsScreen() {
     <Pressable
       style={[
         styles.filterChip,
-        { 
+        {
           backgroundColor: filter === value ? colors.primary : colors.backgroundDefault,
           borderColor: filter === value ? colors.primary : colors.border,
         }

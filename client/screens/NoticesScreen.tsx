@@ -1,3 +1,4 @@
+```typescript
 import React, { useState, useMemo } from 'react';
 import { StyleSheet, View, FlatList, Pressable } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
